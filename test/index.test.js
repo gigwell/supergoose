@@ -1,10 +1,15 @@
+
+/**
+ * @list dependencies
+ **/
+ 
 var mocha = require('mocha')
   , should = require('should')
   , mongoose = require('mongoose')
   , Schema = mongoose.Schema
-  , supergoose = require('../index.js')
+  , supergoose = require('../lib/supergoose.js')
 
-mongoose.connect('mongodb://localhost:27017/supergoose')
+mongoose.connect('mongodb://localhost/supergoose')
 mongoose.connection.on('error', function (err) {
   console.error('MongoDB error: ' + err.message);
   console.error('Make sure a mongoDB server is running and accessible by this application')
