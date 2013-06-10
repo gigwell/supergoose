@@ -12,6 +12,7 @@ mongoose.connection.on('error', function (err) {
 
 var ClickSchema = new Schema({
     ip : {type: String, required: true}
+  , OS: String
   , browser: String
 })
 
@@ -23,7 +24,7 @@ ClickSchema.plugin(supergoose, {messages: messages});
 var Click = mongoose.model('Click', ClickSchema);
 
 afterEach(function(done) {
-  Click.collection.remove()
+  Click.find().remove()
   done();
 })
 
@@ -74,6 +75,19 @@ describe('findOrCreate', function() {
       Click.create({ip: '127.0.0.1', browser: 'Chrome'}, function(err, val) {
         Click.findOrCreate({ip: '127.0.0.1'}, {browser: 'IE'}, {upsert: true}, function(err, click) {
           click.should.have.property('browser', 'IE')
+          Click.count({}, function(err, num) {
+            num.should.equal(1)
+            done();
+          })
+        })
+      })
+    })
+
+    it("adds new properties to an existing object", function(done) {
+      Click.create({ip: '127.0.0.1', browser: 'Chrome'}, function(err, val) {
+        Click.findOrCreate({ip: '127.0.0.1'}, {browser: 'IE', OS: 'Ubuntu'}, {upsert: true}, function(err, click) {
+          click.should.have.property('browser', 'IE')
+          click.should.have.property('OS', 'Ubuntu')
           Click.count({}, function(err, num) {
             num.should.equal(1)
             done();
