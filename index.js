@@ -19,6 +19,11 @@ module.exports = exports = function superGoosePlugin(schema, options) {
       }
     }
     var self = this;
+    doc = _(doc).reduce(function(memo, v, k) {
+      memo[k] = v && v.toJSON ? v.toJSON() : v
+      return memo
+    }, {})
+
     this.findOne(conditions, function(err, result) {
       if(err || result) {
         if(options && options.upsert && !err) {

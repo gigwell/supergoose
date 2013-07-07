@@ -10,10 +10,18 @@ mongoose.connection.on('error', function (err) {
   console.error('Make sure a mongoDB server is running and accessible by this application')
 });
 
+var ReferrerSchema = new Schema({
+    name: String
+  , address: String
+})
+
 var ClickSchema = new Schema({
     ip : {type: String, required: true}
   , OS: String
   , browser: String
+  , referrer: {
+    name: String
+  }
 })
 
 var messages =  {
@@ -22,9 +30,11 @@ var messages =  {
 
 ClickSchema.plugin(supergoose, {messages: messages});
 var Click = mongoose.model('Click', ClickSchema);
+var Referrer = mongoose.model('Referrer', ReferrerSchema);
 
 afterEach(function(done) {
   Click.find().remove()
+  Referrer.find().remove()
   done();
 })
 
@@ -65,6 +75,16 @@ describe('findOrCreate', function() {
         Click.findOrCreate({ip: '127.0.0.1'}, {browser: 'IE'}, function(err, click) {
           click.should.have.property('browser', 'Chrome')
           done();
+        })
+      })
+    })
+
+    it("allows mongoose objects as extra properties", function(done) {
+      Referrer.create({name: 'Carmen Sandiego', address: 'Unknown'}, function(err, referrer) {
+        Click.findOrCreate({ip: '127.0.0.1'}, { referrer: referrer }, function(err, click) {
+          click.referrer.should.have.property('name', 'Carmen Sandiego')
+          should.not.exist(click.referrer.address)
+          done()
         })
       })
     })
