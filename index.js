@@ -1,9 +1,9 @@
-var _ = require('underscore') 
+var _ = require('underscore')
 _.str = require('underscore.string');
 _.mixin(_.str.exports());
 
 module.exports = exports = function superGoosePlugin(schema, options) {
-  if(options) var messages = options.messages 
+  if(options) var messages = options.messages
 
   schema.statics.findOrCreate = function findOrCreate(conditions, doc, options, callback) {
     if (arguments.length < 4) {
@@ -34,11 +34,7 @@ module.exports = exports = function superGoosePlugin(schema, options) {
           callback(err, result)
         }
       } else {
-        _.extend(conditions, doc)
-        var obj = new self(conditions)
-        obj.save(function(err) {
-          callback(err, obj)
-        });
+        self.create(doc, callback)
       }
     })
   }
@@ -46,7 +42,7 @@ module.exports = exports = function superGoosePlugin(schema, options) {
   schema.statics.errors = function errors(errors, callback) {
     errors = _.toArray(errors.errors)
     errors = _.map(errors, function(error) {
-       return _.sprintf(messages[error.type], error.path) 
+       return _.sprintf(messages[error.type], error.path)
     })
     callback(errors)
   }
