@@ -34,7 +34,7 @@ module.exports = exports = function superGoosePlugin(schema, options) {
           callback(err, result)
         }
       } else {
-        self.create(doc, callback)
+        self.create(_.extend(conditions, doc), callback)
       }
     })
   }
