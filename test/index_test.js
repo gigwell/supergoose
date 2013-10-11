@@ -120,9 +120,9 @@ describe('findOrCreate', function() {
   })
 })
 
-describe('hasMany', function() {
+describe('parentOf', function() {
   it('should add ref property to Schema', function() {
-    ReferrerSchema.hasMany('Click')
+    ReferrerSchema.parentOf('Click')
     var path = ReferrerSchema.path('_clicks')
 
     should.exist(path)
@@ -132,7 +132,7 @@ describe('hasMany', function() {
 
   it('should add a reference to the object id on save', function(done) {
     ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
-    ReferrerSchema.hasMany('Click', '_referrer')
+    ReferrerSchema.parentOf('Click', '_referrer')
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
 
@@ -146,18 +146,88 @@ describe('hasMany', function() {
     })
   })
 
-  it.skip('should remove reference to the object id on remove', function(done) {
+  it('should remove reference to the object id on remove', function(done) {
     ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
-    ReferrerSchema.hasMany('Click', '_referrer')
+    ReferrerSchema.parentOf('Click', '_referrer')
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
-    var id = new ObjectId()
+    var id = new mongoose.Types.ObjectId()
 
     Referrer.create({name: 'hello', _clicks: [id]}, function(err, referrer) {
-      Click.create({_id: id, ip: '1234', _referrer: referrer._id }, func)
-      Click.findById(click._id, function(err, click) {
-        click._doc._referrer.should.eql(referrer._id)
-        done()
+      Click.create({_id: id, ip: '1234', _referrer: referrer._doc._id }, function(err) {
+        referrer.remove(function(err) {
+          Click.findById(id, function(err, click) {
+            should.not.exist(click._doc._referrer)
+            done()
+          })
+        })
+      })
+    })
+  })
+})
+
+describe('childOf', function() {
+  it('should add ref property to Schema', function() {
+    ClickSchema.childOf('Referrer')
+    var path = ClickSchema.path('_referrer')
+
+    should.exist(path)
+    path.instance.should.eql('ObjectID')
+    path.options.ref.should.eql('Referrer')
+  })
+
+  it('should add a reference to the object array on save', function(done) {
+    ReferrerSchema.add({_clicks: [{ type: Schema.ObjectId, ref: 'Click' }]})
+    ClickSchema.childOf('Referrer', '_clicks')
+    var Click = mongoose.model('Click', ClickSchema);
+    var Referrer = mongoose.model('Referrer', ReferrerSchema);
+
+    Referrer.create({name: 'hello', _clicks: []}, function(err, referrer) {
+      Click.create({ip: '1234', _referrer: referrer._id }, function(err, click) {
+        Referrer.findById(referrer._id, function(err, referrer) {
+          referrer._doc._clicks.should.include(click._id)
+          done()
+        })
+      })
+    })
+  })
+
+  it('should do nothing if reference exists', function(done) {
+    ReferrerSchema.add({_clicks: [{ type: Schema.ObjectId, ref: 'Click' }]})
+    ClickSchema.childOf('Referrer', '_clicks')
+    var Click = mongoose.model('Click', ClickSchema);
+    var Referrer = mongoose.model('Referrer', ReferrerSchema);
+    var id = new mongoose.Types.ObjectId()
+
+    Referrer.create({name: 'hello', _clicks: [id]}, function(err, referrer) {
+      Click.create({ip: '1234', _referrer: referrer._id, _id: id }, function(err, click) {
+        Referrer.findById(referrer._id, function(err, referrer) {
+          referrer._doc._clicks.should.include(click._id)
+          referrer._doc._clicks.length.should.eql(1)
+          done()
+        })
+      })
+    })
+  })
+
+  it('should pop reference int the object array on remove', function(done) {
+    ReferrerSchema.add({_clicks: [{ type: Schema.ObjectId, ref: 'Click' }]})
+    ClickSchema.childOf('Referrer', '_clicks')
+    var Click = mongoose.model('Click', ClickSchema);
+    var Referrer = mongoose.model('Referrer', ReferrerSchema);
+    var id = new mongoose.Types.ObjectId()
+    var id2 = new mongoose.Types.ObjectId()
+
+    Click.create({ip: 'hello', _referrer: id}, function(err, click) {
+      Referrer.create({_id: id, _clicks: [click._doc._id, id2] }, function(err) {
+        click.remove(function(err) {
+          Referrer.findById(id, function(err, referrer) {
+            referrer._doc._clicks.length.should.eql(1)
+            referrer._doc._clicks.should.include(id2)
+            referrer._doc._clicks.should.not.include(click._id)
+            done()
+          })
+        })
       })
     })
   })

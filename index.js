@@ -7,6 +7,26 @@ _.mixin(_.str.exports());
 module.exports = exports = function superGoosePlugin(schema, options) {
   if(options) var messages = options.messages
 
+  function addPathTo(modelName, pathOptions) {
+    var addition = {}
+    addition[modelName] = pathOptions
+    schema.add(addition)
+  }
+
+  function updateDependents(modelName, fieldName, pathName, updateOp) {
+    return function(next) {
+      var update = { }
+      update[updateOp] = {}
+      update[updateOp][fieldName] = this._doc._id
+
+      var query = _.isArray(this._doc[pathName])
+        ? {_id: { $in: this._doc[pathName] }}
+        : {_id: this._doc[pathName]}
+
+      mongoose.model(modelName).update(query, update, {multi: true}, next)
+    }
+  }
+
   schema.statics.findOrCreate = function findOrCreate(conditions, doc, options, callback) {
     if (arguments.length < 4) {
       if (_.isFunction(options)) {
@@ -49,18 +69,19 @@ module.exports = exports = function superGoosePlugin(schema, options) {
     callback(errors)
   }
 
-  schema.hasMany = function(modelName, fieldName) {
-    var addition = {}
-      , pathName = _.sprintf('_%ss', modelName.toLowerCase())
+  schema.parentOf = function(modelName, fieldName) {
+    var pathName = _.sprintf('_%ss', modelName.toLowerCase())
 
-    addition[pathName] = [{type: ObjectId, ref: modelName}]
-    schema.add(addition)
+    addPathTo(pathName, [{type: ObjectId, ref: modelName}])
+    schema.post('save', updateDependents(modelName, fieldName, pathName, '$set'))
+    schema.pre('remove', updateDependents(modelName, fieldName, pathName, '$unset'))
+  }
 
-    schema.pre('save', function(next) {
-      var query = {_id: {$in: this._doc[pathName]}}
-        , update = { $set: {} }
-      update.$set[fieldName] = this._doc._id
-      mongoose.model(modelName).update(query, update, {multi: true}, next)
-    })
+  schema.childOf = function(modelName, fieldName) {
+    var pathName = _.sprintf('_%s', modelName.toLowerCase())
+
+    addPathTo(pathName, {type: ObjectId, ref: modelName})
+    schema.post('save', updateDependents(modelName, fieldName, pathName, '$addToSet'))
+    schema.pre('remove', updateDependents(modelName, fieldName, pathName, '$pull'))
   }
 }
