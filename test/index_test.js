@@ -29,6 +29,8 @@ var messages =  {
 }
 
 ClickSchema.plugin(supergoose, {messages: messages});
+ReferrerSchema.plugin(supergoose);
+
 var Click = mongoose.model('Click', ClickSchema);
 var Referrer = mongoose.model('Referrer', ReferrerSchema);
 
@@ -112,6 +114,33 @@ describe('findOrCreate', function() {
             num.should.equal(1)
             done();
           })
+        })
+      })
+    })
+  })
+})
+
+describe('hasMany', function() {
+  it('should add ref property to Schema', function() {
+    ReferrerSchema.hasMany('Click')
+    var path = ReferrerSchema.path('_clicks')
+
+    should.exist(path)
+    path.caster.instance.should.eql('ObjectID')
+    path.caster.options.ref.should.eql('Click')
+  })
+
+  it('should add a reference to the object id on save', function(done) {
+    ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
+    ReferrerSchema.hasMany('Click', '_referrer')
+    var Click = mongoose.model('Click', ClickSchema);
+    var Referrer = mongoose.model('Referrer', ReferrerSchema);
+
+    Click.create({ip: '1234'}, function(err, click) {
+      Referrer.create({name: 'hello', _clicks: [click._id]}, function(err, referrer) {
+        Click.findById(click._id, function(err, click) {
+          click._doc._referrer.should.eql(referrer._id)
+          done()
         })
       })
     })

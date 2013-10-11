@@ -1,4 +1,6 @@
 var _ = require('underscore')
+  , mongoose = require('mongoose')
+  , ObjectId = mongoose.Schema.ObjectId
 _.str = require('underscore.string');
 _.mixin(_.str.exports());
 
@@ -45,5 +47,20 @@ module.exports = exports = function superGoosePlugin(schema, options) {
        return _.sprintf(messages[error.type], error.path)
     })
     callback(errors)
+  }
+
+  schema.hasMany = function(modelName, fieldName) {
+    var addition = {}
+      , pathName = _.sprintf('_%ss', modelName.toLowerCase())
+
+    addition[pathName] = [{type: ObjectId, ref: modelName}]
+    schema.add(addition)
+
+    schema.pre('save', function(next) {
+      var query = {_id: {$in: this._doc[pathName]}}
+        , update = { $set: {} }
+      update.$set[fieldName] = this._doc._id
+      mongoose.model(modelName).update(query, update, {multi: true}, next)
+    })
   }
 }
