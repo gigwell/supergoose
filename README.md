@@ -1,8 +1,8 @@
 supergoose
 ==================
 
-[Mongoose](https://github.com/LearnBoost/mongoose) simple plugin adding some 
-handy functions. 
+[Mongoose](https://github.com/LearnBoost/mongoose) simple plugin adding some
+handy functions.
 
 ```javasript
 /* Adds find or create functionality to mongoose models. This is handy
@@ -44,7 +44,7 @@ Click.findOrCreate({ip: '127.0.0.1'}, function(err, click) {
 });
 ```
 
-You can also include properties that aren't used in the 
+You can also include properties that aren't used in the
 find call, but will be added to the object if it is created.
 
 ```javascript
@@ -55,6 +55,49 @@ Click.create({ip: '127.0.0.1'}, {browser: 'Mozilla'}, function(err, val) {
   })
 });
 ```
+# parentOf
+```javascript
+var supergoose = require('supergoose')
+var mongoose = require('mongoose')
+
+var ClickSchema = new Schema({ip: {type: String, required: true}, _user: {type: ObjectId}});
+var UserSchema = new Schema({name: String})
+
+UserSchema.plugin(supergoose, {instance: mongoose});
+UserSchema.parentOf('Click', '_user')
+
+var Click = mongoose.model('Click', ClickSchema);
+var User = mongoose.model('Click', ClickSchema);
+
+```
+
+The User model now has a '_clicks' field that is an array of ObjectIds that references the Click model.
+
+It will enforce the relationship by setting the _user field on any clicks in a User's array on save and unsetting the field on remove
+
+ParentOf also takes an optional object to change the name of the created path and to mark children for deletion rather than orphanage on remove
+
+# childOf
+```javascript
+var supergoose = require('supergoose')
+var mongoose = require('mongoose')
+
+var ClickSchema = new Schema({ip: {type: String, required: true});
+var UserSchema = new Schema({name: String, _clicks: [{type: ObjectId}]})
+
+ClickSchema.plugin(supergoose, {instance: mongoose});
+ClickSchema.parentOf('User', '_clicks')
+
+var Click = mongoose.model('Click', ClickSchema);
+var User = mongoose.model('Click', ClickSchema);
+
+```
+
+The Click model now has a '_user' field that is an array of ObjectIds that references the USer model.
+
+It will enforce the relationship by pushing an id to the _clicks field on any user on save and pulling the id on remove
+
+ChildOf also takes an optional object to change the name of the created path
 
 # errors
 ```javascript
@@ -72,11 +115,11 @@ Click.create({}, function(err, click) {
     Click.errors(err, function(messages) {
       console.log(messages);
       // outputs ['ip is a required field']
-    }) 
+    })
   }
 });
+
 ```
-      
 License
 -------
 
