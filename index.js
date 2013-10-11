@@ -5,7 +5,10 @@ _.str = require('underscore.string');
 _.mixin(_.str.exports());
 
 module.exports = exports = function superGoosePlugin(schema, options) {
-  if(options) var messages = options.messages
+  if(options)  {
+    var messages = options.messages
+    var instance = options.instance
+  }
 
   function addPathTo(modelName, pathOptions) {
     var addition = {}
@@ -23,7 +26,7 @@ module.exports = exports = function superGoosePlugin(schema, options) {
         ? {_id: { $in: this._doc[pathName] }}
         : {_id: this._doc[pathName]}
 
-      mongoose.model(modelName).update(query, update, {multi: true}, next)
+      instance.model(modelName).update(query, update, {multi: true}, next)
     }
   }
 
@@ -33,7 +36,7 @@ module.exports = exports = function superGoosePlugin(schema, options) {
         ? {_id: { $in: this._doc[pathName] }}
         : {_id: this._doc[pathName]}
 
-      mongoose.model(modelName).find(query, function(err, docs) {
+      instance.model(modelName).find(query, function(err, docs) {
         _.each(docs, function(d) {
           d.remove()
         })

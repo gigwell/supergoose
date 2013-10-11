@@ -30,8 +30,8 @@ var messages =  {
   'required': "%s is required"
 }
 
-ClickSchema.plugin(supergoose, {messages: messages});
-ReferrerSchema.plugin(supergoose);
+ClickSchema.plugin(supergoose, {messages: messages, instance: mongoose});
+ReferrerSchema.plugin(supergoose, {instance: mongoose});
 
 var Click = mongoose.model('Click', ClickSchema);
 var Referrer = mongoose.model('Referrer', ReferrerSchema);
