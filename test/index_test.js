@@ -24,6 +24,8 @@ var ClickSchema = new Schema({
   }
 })
 
+var OtherSchema = new Schema({field: String, _click: {type: Schema.ObjectId, ref: 'Click'}})
+
 var messages =  {
   'required': "%s is required"
 }
@@ -33,10 +35,12 @@ ReferrerSchema.plugin(supergoose);
 
 var Click = mongoose.model('Click', ClickSchema);
 var Referrer = mongoose.model('Referrer', ReferrerSchema);
+var Other = mongoose.model('Other', OtherSchema);
 
 afterEach(function(done) {
   Click.find().remove()
   Referrer.find().remove()
+  Other.find().remove()
   done();
 })
 
@@ -130,6 +134,15 @@ describe('parentOf', function() {
     path.caster.options.ref.should.eql('Click')
   })
 
+  it('should allow for custom paths', function() {
+    ReferrerSchema.parentOf('Click', '', {path: '_funsos'})
+    var path = ReferrerSchema.path('_funsos')
+
+    should.exist(path)
+    path.caster.instance.should.eql('ObjectID')
+    path.caster.options.ref.should.eql('Click')
+  })
+
   it('should add a reference to the object id on save', function(done) {
     ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
     ReferrerSchema.parentOf('Click', '_referrer')
@@ -164,12 +177,77 @@ describe('parentOf', function() {
       })
     })
   })
+
+  it('should remove child on remove if delete option set', function(done) {
+    ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
+    ReferrerSchema.parentOf('Click', '_referrer', {delete: true})
+    var Click = mongoose.model('Click', ClickSchema);
+    var Referrer = mongoose.model('Referrer', ReferrerSchema);
+    var id = new mongoose.Types.ObjectId()
+
+    Referrer.create({name: 'hello', _clicks: [id]}, function(err, referrer) {
+      Click.create({_id: id, ip: '1234', _referrer: referrer._doc._id }, function(err) {
+        referrer.remove(function(err) {
+          Click.findById(id, function(err, click) {
+            should.not.exist(click)
+            done()
+          })
+        })
+      })
+    })
+  })
+
+  it('remove deletions should cascade', function(done) {
+    ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
+    ClickSchema.parentOf('Other', '_click', {delete: true})
+    ReferrerSchema.parentOf('Click', '_referrer', {delete: true})
+
+    var Click = mongoose.model('Click', ClickSchema);
+    var Referrer = mongoose.model('Referrer', ReferrerSchema);
+    var id = new mongoose.Types.ObjectId()
+
+    Other.create({field: 1}, function(err, other1) {
+      Other.create({field: 2}, function(err, other2) {
+        Referrer.create({name: 'hello', _clicks: [id]}, function(err, referrer) {
+          var click = {
+            _id: id,
+            ip: '1234',
+            _referrer: referrer._doc._id,
+            _others: [other1._doc._id, other2._doc._id]
+          }
+
+          Click.create(click, function(err) {
+            referrer.remove(function(err) {
+              Click.findById(id, function(err, click) {
+                should.not.exist(click)
+                Other.count({}, function(err, otherCount) {
+                  setTimeout(function() {
+                    otherCount.should.eql(0)
+                    done()
+                  }, 100)
+                })
+              })
+            })
+          })
+        })
+      })
+    })
+  })
 })
 
 describe('childOf', function() {
   it('should add ref property to Schema', function() {
     ClickSchema.childOf('Referrer')
     var path = ClickSchema.path('_referrer')
+
+    should.exist(path)
+    path.instance.should.eql('ObjectID')
+    path.options.ref.should.eql('Referrer')
+  })
+
+  it('should allow custom paths', function() {
+    ClickSchema.childOf('Referrer', '', { path: '_funsos' })
+    var path = ClickSchema.path('_funsos')
 
     should.exist(path)
     path.instance.should.eql('ObjectID')

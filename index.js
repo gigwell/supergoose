@@ -27,6 +27,22 @@ module.exports = exports = function superGoosePlugin(schema, options) {
     }
   }
 
+  function removeDependents(modelName, pathName) {
+    return function(next) {
+      var query = _.isArray(this._doc[pathName])
+        ? {_id: { $in: this._doc[pathName] }}
+        : {_id: this._doc[pathName]}
+
+      mongoose.model(modelName).find(query, function(err, docs) {
+        _.each(docs, function(d) {
+          d.remove()
+        })
+      })
+
+      next()
+    }
+  }
+
   schema.statics.findOrCreate = function findOrCreate(conditions, doc, options, callback) {
     if (arguments.length < 4) {
       if (_.isFunction(options)) {
@@ -69,19 +85,23 @@ module.exports = exports = function superGoosePlugin(schema, options) {
     callback(errors)
   }
 
-  schema.parentOf = function(modelName, fieldName) {
+  schema.parentOf = function(modelName, fieldName, options) {
     var pathName = _.sprintf('_%ss', modelName.toLowerCase())
+    options = _.extend({delete: false, path: pathName}, options)
 
-    addPathTo(pathName, [{type: ObjectId, ref: modelName}])
-    schema.post('save', updateDependents(modelName, fieldName, pathName, '$set'))
-    schema.pre('remove', updateDependents(modelName, fieldName, pathName, '$unset'))
+    addPathTo(options.path, [{type: ObjectId, ref: modelName}])
+    schema.post('save', updateDependents(modelName, fieldName, options.path, '$set'))
+    schema.pre('remove', options.delete
+               ? removeDependents(modelName, options.path)
+               : updateDependents(modelName, fieldName, options.path, '$unset'))
   }
 
-  schema.childOf = function(modelName, fieldName) {
+  schema.childOf = function(modelName, fieldName, options) {
     var pathName = _.sprintf('_%s', modelName.toLowerCase())
+    options = _.extend({path: pathName}, options)
 
-    addPathTo(pathName, {type: ObjectId, ref: modelName})
-    schema.post('save', updateDependents(modelName, fieldName, pathName, '$addToSet'))
-    schema.pre('remove', updateDependents(modelName, fieldName, pathName, '$pull'))
+    addPathTo(options.path, {type: ObjectId, ref: modelName})
+    schema.post('save', updateDependents(modelName, fieldName, options.path, '$addToSet'))
+    schema.pre('remove', updateDependents(modelName, fieldName, options.path, '$pull'))
   }
 }
