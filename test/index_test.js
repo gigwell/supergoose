@@ -145,6 +145,22 @@ describe('hasMany', function() {
       })
     })
   })
+
+  it.skip('should remove reference to the object id on remove', function(done) {
+    ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
+    ReferrerSchema.hasMany('Click', '_referrer')
+    var Click = mongoose.model('Click', ClickSchema);
+    var Referrer = mongoose.model('Referrer', ReferrerSchema);
+    var id = new ObjectId()
+
+    Referrer.create({name: 'hello', _clicks: [id]}, function(err, referrer) {
+      Click.create({_id: id, ip: '1234', _referrer: referrer._id }, func)
+      Click.findById(click._id, function(err, click) {
+        click._doc._referrer.should.eql(referrer._id)
+        done()
+      })
+    })
+  })
 })
 
 describe('errorMessages', function() {
