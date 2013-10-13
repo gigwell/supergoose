@@ -39,6 +39,8 @@ __Valid Options__
 * instance <Object> - The instance of mongoose used in the application (Required for Schema functions)
 * messages <Object> - Object of custom messages (Required for errors function)
 
+---------------------------------------
+
 <a name="findOrCreate" />
 ### findOrCreate()
 
@@ -59,8 +61,10 @@ __Arguments__
 __Valid Options__
 * upsert <bool> - updates the object if it exists. Default: false
 
-### parentOf
+---------------------------------------
+
 <a name="parentOf" />
+### parentOf
 
 Enforces parent relationship on a child object. When called, a path on the schema will be added that references the child model. On save, any model instantiated with this schema will add its id to their children. On remove, the model with orphan its children.
 
@@ -89,9 +93,10 @@ __Valid Options__
 * delete <bool> - If set, child models will be deleted rather than orphaned on remove. Default: false
 * path <String> - Alternate pathName for child on parent model. Default: _<modelName>s
 
+---------------------------------------
 
-### childOf
 <a name="childOf" />
+### childOf
 
 Enforces child relationship on a parent object. When called, a path on the schema will be added that references the parent model. On save, any model instantiated with this schema will add its id to its parent's collection. On remove, the model with remove its id from its parent's collection.
 
@@ -120,8 +125,10 @@ __Arguments__
 __Valid Options__
 * path <String> - Alternate pathName for parent on child model. Default: _<modelName>
 
-### errors
+---------------------------------------
+
 <a name="errors" />
+### errors
 
 Parses the complex validation errors return from mongoose into a simple
 array of messages to be displayed as flash messages or something similar
