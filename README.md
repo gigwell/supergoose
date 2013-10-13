@@ -24,7 +24,7 @@ Installation
 Usage
 -----
 
-# findOrCreate
+### findOrCreate
 
 ```javascript
 var supergoose = require('supergoose')
@@ -55,7 +55,7 @@ Click.create({ip: '127.0.0.1'}, {browser: 'Mozilla'}, function(err, val) {
   })
 });
 ```
-# parentOf
+### parentOf
 ```javascript
 var supergoose = require('supergoose')
 var mongoose = require('mongoose')
@@ -77,7 +77,7 @@ It will enforce the relationship by setting the _user field on any clicks in a U
 
 ParentOf also takes an optional object to change the name of the created path and to mark children for deletion rather than orphanage on remove
 
-# childOf
+### childOf
 ```javascript
 var supergoose = require('supergoose')
 var mongoose = require('mongoose')
@@ -99,7 +99,7 @@ It will enforce the relationship by pushing an id to the _clicks field on any us
 
 ChildOf also takes an optional object to change the name of the created path
 
-# errors
+### errors
 ```javascript
 var supergoose = require('supergoose')
 var ClickSchema = new Schema({ip: {type: String, required: true}});
