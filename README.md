@@ -1,4 +1,4 @@
-supergoose
+supergoose [![Build Status](https://travis-ci.org/jamplify/supergoose.png)](https://travis-ci.org/jamplify/supergoose)
 ==================
 
 [Mongoose](https://github.com/LearnBoost/mongoose) simple plugin adding some
