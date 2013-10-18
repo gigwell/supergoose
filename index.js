@@ -47,6 +47,9 @@ module.exports = exports = function superGoosePlugin(schema, options) {
   }
 
   schema.statics.findOrCreate = function findOrCreate(conditions, doc, options, callback) {
+    function cbCreated(err, results) { callback(err, results, true) }
+    function cbFound(err, results) { callback(err, results, false) }
+
     if (arguments.length < 4) {
       if (_.isFunction(options)) {
         // Scenario: findOrCreate(conditions, doc, callback)
@@ -69,14 +72,10 @@ module.exports = exports = function superGoosePlugin(schema, options) {
       if(err || result) {
         if(options && options.upsert && !err) {
           self.update(conditions, doc, function(err, count){
-            self.findOne(conditions, callback);
+            self.findOne(conditions, cbFound)
           })
-        } else {
-          callback(err, result)
-        }
-      } else {
-        self.create(_.extend(conditions, doc), callback)
-      }
+        } else { cbFound(err, result) }
+      } else { self.create(_.extend(conditions, doc), cbCreated) }
     })
   }
 

@@ -67,6 +67,22 @@ describe('findOrCreate', function() {
     })
   })
 
+  it("should notify when object was created", function(done) {
+    Click.findOrCreate({ip: '127.0.0.1'}, function(err, click, created) {
+      created.should.eql(true)
+      done()
+    })
+  })
+
+  it("it should notify if the object was found", function(done) {
+    Click.create({ip: '127.0.0.1'}, function(err, val) {
+      Click.findOrCreate({ip: '127.0.0.1'}, function(err, click, created) {
+        created.should.eql(false)
+        done();
+      })
+    })
+  })
+
   describe('with extra properties', function() {
     it("extends the object with additional properties", function(done) {
       Click.findOrCreate({ip: '127.0.0.1'}, {browser: 'Mozilla'}, function(err, click) {
@@ -118,6 +134,15 @@ describe('findOrCreate', function() {
             num.should.equal(1)
             done();
           })
+        })
+      })
+    })
+
+    it("notifies that there was no creation", function(done) {
+      Click.create({ip: '127.0.0.1', browser: 'Chrome'}, function(err, val) {
+        Click.findOrCreate({ip: '127.0.0.1'}, {browser: 'IE'}, {upsert: true}, function(err, click, created) {
+          created.should.equal(false)
+          done();
         })
       })
     })
