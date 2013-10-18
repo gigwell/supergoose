@@ -27,8 +27,9 @@ Use mongoose's plugin method to extend your models with supergoose
 
 ```javascript
 var supergoose = require('supergoose')
-var ClickSchema = new Schema({ ... });
+var Click = new Schema({ ... });
 Click.plugin(supergoose, [options]);
+mongoose.model('Click', Click)
 ```
 
 __Arguments__
