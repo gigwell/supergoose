@@ -15,7 +15,7 @@
   }
   , "devDependencies": {
       "should": ">= 0.2.1"
-    , "mocha": ">= 0.13.0"
+    , "mocha": ">= 1.13.0"
     }
   , "scripts": {
       "test": "mocha -u bdd -R spec -c ./test/*test.js"
