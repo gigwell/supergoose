@@ -164,7 +164,7 @@ describe('parentOf', function() {
   })
 
   it('should allow for custom paths', function() {
-    ReferrerSchema.parentOf('Click', '', {path: '_funsos'})
+    ReferrerSchema.parentOf('Click', '_funsos')
     var path = ReferrerSchema.path('_funsos')
 
     should.exist(path)
@@ -174,7 +174,7 @@ describe('parentOf', function() {
 
   it('should add a reference to the object id on save', function(done) {
     ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
-    ReferrerSchema.parentOf('Click', '_referrer')
+    ReferrerSchema.parentOf('Click').enforceRelationshipWith('_referrer')
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
 
@@ -190,7 +190,7 @@ describe('parentOf', function() {
 
   it('should remove reference to the object id on remove', function(done) {
     ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
-    ReferrerSchema.parentOf('Click', '_referrer')
+    ReferrerSchema.parentOf('Click').enforceRelationshipWith('_referrer')
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
     var id = new mongoose.Types.ObjectId()
@@ -209,7 +209,7 @@ describe('parentOf', function() {
 
   it('should remove child on remove if delete option set', function(done) {
     ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
-    ReferrerSchema.parentOf('Click', '_referrer', {delete: true})
+    ReferrerSchema.parentOf('Click').enforceRelationshipWith('_referrer', {delete: true})
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
     var id = new mongoose.Types.ObjectId()
@@ -228,8 +228,8 @@ describe('parentOf', function() {
 
   it('remove deletions should cascade', function(done) {
     ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
-    ClickSchema.parentOf('Other', '_click', {delete: true})
-    ReferrerSchema.parentOf('Click', '_referrer', {delete: true})
+    ClickSchema.parentOf('Other').enforceRelationshipWith('_click', {delete: true})
+    ReferrerSchema.parentOf('Click').enforceRelationshipWith('_referrer', {delete: true})
 
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
@@ -275,7 +275,7 @@ describe('childOf', function() {
   })
 
   it('should allow custom paths', function() {
-    ClickSchema.childOf('Referrer', '', { path: '_funsos' })
+    ClickSchema.childOf('Referrer', '_funsos')
     var path = ClickSchema.path('_funsos')
 
     should.exist(path)
@@ -285,7 +285,7 @@ describe('childOf', function() {
 
   it('should add a reference to the object array on save', function(done) {
     ReferrerSchema.add({_clicks: [{ type: Schema.ObjectId, ref: 'Click' }]})
-    ClickSchema.childOf('Referrer', '_clicks')
+    ClickSchema.childOf('Referrer').enforceRelationshipWith('_clicks')
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
 
@@ -301,7 +301,7 @@ describe('childOf', function() {
 
   it('should do nothing if reference exists', function(done) {
     ReferrerSchema.add({_clicks: [{ type: Schema.ObjectId, ref: 'Click' }]})
-    ClickSchema.childOf('Referrer', '_clicks')
+    ClickSchema.childOf('Referrer').enforceRelationshipWith('_clicks')
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
     var id = new mongoose.Types.ObjectId()
@@ -319,7 +319,7 @@ describe('childOf', function() {
 
   it('should pop reference int the object array on remove', function(done) {
     ReferrerSchema.add({_clicks: [{ type: Schema.ObjectId, ref: 'Click' }]})
-    ClickSchema.childOf('Referrer', '_clicks')
+    ClickSchema.childOf('Referrer').enforceRelationshipWith('_clicks')
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
     var id = new mongoose.Types.ObjectId()
