@@ -338,6 +338,28 @@ describe('childOf', function() {
       })
     })
   })
+
+  it('should ignore delete option on remove', function(done) {
+    ReferrerSchema.add({_clicks: [{ type: Schema.ObjectId, ref: 'Click' }]})
+    ClickSchema.childOf('Referrer').enforceRelationshipWith('_clicks', {delete: true})
+    var Click = mongoose.model('Click', ClickSchema);
+    var Referrer = mongoose.model('Referrer', ReferrerSchema);
+    var id = new mongoose.Types.ObjectId()
+    var id2 = new mongoose.Types.ObjectId()
+
+    Click.create({ip: 'hello', _referrer: id}, function(err, click) {
+      Referrer.create({_id: id, _clicks: [click._doc._id, id2] }, function(err) {
+        click.remove(function(err) {
+          Referrer.findById(id, function(err, referrer) {
+            referrer._doc._clicks.length.should.eql(1)
+            referrer._doc._clicks.should.include(id2)
+            referrer._doc._clicks.should.not.include(click._id)
+            done()
+          })
+        })
+      })
+    })
+  })
 })
 
 describe('errorMessages', function() {
