@@ -350,12 +350,14 @@ describe('childOf', function() {
     Click.create({ip: 'hello', _referrer: id}, function(err, click) {
       Referrer.create({_id: id, _clicks: [click._doc._id, id2] }, function(err) {
         click.remove(function(err) {
-          Referrer.findById(id, function(err, referrer) {
-            referrer._doc._clicks.length.should.eql(1)
-            referrer._doc._clicks.should.include(id2)
-            referrer._doc._clicks.should.not.include(click._id)
-            done()
-          })
+          setTimeout(function() {
+            Referrer.findById(id, function(err, referrer) {
+              referrer._doc._clicks.length.should.eql(1)
+              referrer._doc._clicks.should.include(id2)
+              referrer._doc._clicks.should.not.include(click._id)
+              done()
+            })
+          }, 100)
         })
       })
     })
