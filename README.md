@@ -67,7 +67,7 @@ __Valid Options__
 <a name="parentOf" />
 ### parentOf
 
-Enforces parent relationship on a child object. When called, a path on the schema will be added that references the child model. On save, any model instantiated with this schema will add its id to their children. On remove, the model with orphan its children.
+Creates a one-to-many Relationship
 
 ```javascript
 var supergoose = require('supergoose')
@@ -77,29 +77,23 @@ var ClickSchema = new Schema({ip: {type: String, required: true}, _user: {type: 
 var UserSchema = new Schema({name: String})
 
 UserSchema.plugin(supergoose, {instance: mongoose});
-UserSchema.parentOf('Click', '_user')
-
-var Click = mongoose.model('Click', ClickSchema);
-var User = mongoose.model('User', UserSchema);
+var Relationship = UserSchema.parentOf('Click', '_user')
 
 ```
-The User model now has a '_clicks' field that is an array of ObjectIds that references the Click model.
 
 __Arguments__
 * modelName <String> - Name of child Model
-* fieldName <String> - Name of path on child Model that refers to parent
-* [options] <Object>
+* [myPath] <String> - Name of schema path
 
-__Valid Options__
-* delete <bool> - If set, child models will be deleted rather than orphaned on remove. Default: false
-* path <String> - Alternate pathName for child on parent model. Default: _<modelName>s
+__Returns__
+* Relationship
 
 ---------------------------------------
 
 <a name="childOf" />
 ### childOf
 
-Enforces child relationship on a parent object. When called, a path on the schema will be added that references the parent model. On save, any model instantiated with this schema will add its id to its parent's collection. On remove, the model with remove its id from its parent's collection.
+Creates a many-to-one relationship
 
 ```javascript
 var supergoose = require('supergoose')
@@ -116,15 +110,12 @@ var User = mongoose.model('User', UserSchema);
 
 ```
 
-The Click model now has a '_user' field that is an ObjectId that references the User model.
-
 __Arguments__
-* modelName <String> - Name of parent Model
-* fieldName <String> - Name of path on user Model that refers to parent
-* [options] <Object>
+* modelName <String> - Name of child Model
+* [myPath] <String> - Name of schema path
 
-__Valid Options__
-* path <String> - Alternate pathName for parent on child model. Default: _<modelName>
+__Returns__
+* Relationship
 
 ---------------------------------------
 

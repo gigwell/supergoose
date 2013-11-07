@@ -174,7 +174,7 @@ describe('parentOf', function() {
 
   it('should add a reference to the object id on save', function(done) {
     ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
-    ReferrerSchema.parentOf('Click').enforceRelationshipWith('_referrer')
+    ReferrerSchema.parentOf('Click').enforceWith('_referrer')
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
 
@@ -190,7 +190,7 @@ describe('parentOf', function() {
 
   it('should remove reference to the object id on remove', function(done) {
     ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
-    ReferrerSchema.parentOf('Click').enforceRelationshipWith('_referrer')
+    ReferrerSchema.parentOf('Click').enforceWith('_referrer')
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
     var id = new mongoose.Types.ObjectId()
@@ -209,7 +209,7 @@ describe('parentOf', function() {
 
   it('should remove child on remove if delete option set', function(done) {
     ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
-    ReferrerSchema.parentOf('Click').enforceRelationshipWith('_referrer', {delete: true})
+    ReferrerSchema.parentOf('Click').enforceWith('_referrer', {delete: true})
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
     var id = new mongoose.Types.ObjectId()
@@ -228,8 +228,8 @@ describe('parentOf', function() {
 
   it('remove deletions should cascade', function(done) {
     ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
-    ClickSchema.parentOf('Other').enforceRelationshipWith('_click', {delete: true})
-    ReferrerSchema.parentOf('Click').enforceRelationshipWith('_referrer', {delete: true})
+    ClickSchema.parentOf('Other').enforceWith('_click', {delete: true})
+    ReferrerSchema.parentOf('Click').enforceWith('_referrer', {delete: true})
 
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
@@ -285,7 +285,7 @@ describe('childOf', function() {
 
   it('should add a reference to the object array on save', function(done) {
     ReferrerSchema.add({_clicks: [{ type: Schema.ObjectId, ref: 'Click' }]})
-    ClickSchema.childOf('Referrer').enforceRelationshipWith('_clicks')
+    ClickSchema.childOf('Referrer').enforceWith('_clicks')
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
 
@@ -301,7 +301,7 @@ describe('childOf', function() {
 
   it('should do nothing if reference exists', function(done) {
     ReferrerSchema.add({_clicks: [{ type: Schema.ObjectId, ref: 'Click' }]})
-    ClickSchema.childOf('Referrer').enforceRelationshipWith('_clicks')
+    ClickSchema.childOf('Referrer').enforceWith('_clicks')
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
     var id = new mongoose.Types.ObjectId()
@@ -319,7 +319,7 @@ describe('childOf', function() {
 
   it('should pop reference int the object array on remove', function(done) {
     ReferrerSchema.add({_clicks: [{ type: Schema.ObjectId, ref: 'Click' }]})
-    ClickSchema.childOf('Referrer').enforceRelationshipWith('_clicks')
+    ClickSchema.childOf('Referrer').enforceWith('_clicks')
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
     var id = new mongoose.Types.ObjectId()
@@ -341,7 +341,7 @@ describe('childOf', function() {
 
   it('should ignore delete option on remove', function(done) {
     ReferrerSchema.add({_clicks: [{ type: Schema.ObjectId, ref: 'Click' }]})
-    ClickSchema.childOf('Referrer').enforceRelationshipWith('_clicks', {delete: true})
+    ClickSchema.childOf('Referrer').enforceWith('_clicks', {delete: true})
     var Click = mongoose.model('Click', ClickSchema);
     var Referrer = mongoose.model('Referrer', ReferrerSchema);
     var id = new mongoose.Types.ObjectId()
