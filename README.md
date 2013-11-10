@@ -9,10 +9,14 @@ handy functions.
 * [findOrCreate](#findOrCreate)
 * [errors](#errors)
 
-## Schema functions
+## Relationship creator functions
 
-* [parentOf](#parentOf)
-* [childOf](#childOf)
+* [parentOf](#relFunction)
+* [childOf](#relFunction)
+* [hasA](#relFunction)
+* [hasMany](#relFunction)
+
+## [Relationship](#relationship)
 
 Installation
 ------------
@@ -64,61 +68,6 @@ __Valid Options__
 
 ---------------------------------------
 
-<a name="parentOf" />
-### parentOf
-
-Creates a one-to-many Relationship
-
-```javascript
-var supergoose = require('supergoose')
-var mongoose = require('mongoose')
-
-var ClickSchema = new Schema({ip: {type: String, required: true}, _user: {type: ObjectId}});
-var UserSchema = new Schema({name: String})
-
-UserSchema.plugin(supergoose, {instance: mongoose});
-var Relationship = UserSchema.parentOf('Click', '_user')
-
-```
-
-__Arguments__
-* modelName <String> - Name of child Model
-* [myPath] <String> - Name of schema path
-
-__Returns__
-* Relationship
-
----------------------------------------
-
-<a name="childOf" />
-### childOf
-
-Creates a many-to-one relationship
-
-```javascript
-var supergoose = require('supergoose')
-var mongoose = require('mongoose')
-
-var ClickSchema = new Schema({ip: {type: String, required: true});
-var UserSchema = new Schema({name: String, _clicks: [{type: ObjectId}]})
-
-ClickSchema.plugin(supergoose, {instance: mongoose});
-ClickSchema.childOf('User', '_clicks')
-
-var Click = mongoose.model('Click', ClickSchema);
-var User = mongoose.model('User', UserSchema);
-
-```
-
-__Arguments__
-* modelName <String> - Name of child Model
-* [myPath] <String> - Name of schema path
-
-__Returns__
-* Relationship
-
----------------------------------------
-
 <a name="errors" />
 ### errors
 
@@ -147,6 +96,52 @@ Click.create({}, function(err, click) {
 __Arguments__
 * errors <Error> - error returned from mongoose command
 * callback <Function>
+
+---------------------------------------
+
+<a name="relFunction" />
+### Relationship Creator Functions
+
+* parentOf - Creates a one to many relationship
+* childOf - Creates a many to one relationship
+* hasA - Creates a one to one relationship
+* hasMany - Creates a many to many relationship
+
+__Arguments__
+* modelName <String> - Name of related Model
+* [myPath] <String> - Name of path on this schema that refers to related Model. (If not provided, a default is used based on the model name. '_clicks' for the above example)
+
+__Returns__
+* Relationship
+
+---------------------------------------
+
+### Relationship
+
+When a relationship is created, it adds a path that refers to the related model on the schema that creates it.
+The relationship object has one property:
+
+#### enforceWith
+
+```javascript
+var supergoose = require('supergoose')
+var mongoose = require('mongoose')
+
+var ClickSchema = new Schema({ip: {type: String, required: true}, _user: {type: ObjectId}});
+var UserSchema = new Schema({name: String})
+
+UserSchema.plugin(supergoose, {instance: mongoose});
+UserSchema.parentOf('Click', 'clickCollection').enforceWith('_user')
+
+```
+
+__Arguments__
+* itsPath <String> - Name of path on related model that refers back to this schema.
+* [options] <Object>
+
+__Valid Options__
+* delete <bool> - Default: false. Only affects one to X relationships. If set to true, when a doc is removed, it will delete related docs.
+
 
 License
 -------
