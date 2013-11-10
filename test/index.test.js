@@ -42,10 +42,11 @@ var Referrer = mongoose.model('Referrer', ReferrerSchema);
 var Other = mongoose.model('Other', OtherSchema);
 
 afterEach(function(done) {
-  Click.find().remove()
-  Referrer.find().remove()
-  Other.find().remove()
-  done();
+  Click.remove(function(err) {
+    Referrer.remove(function() {
+      Other.remove(done)
+    })
+  })
 })
 
 describe('findOrCreate', function() {
