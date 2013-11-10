@@ -15,8 +15,7 @@ handy functions.
 * [childOf](#relFunction)
 * [hasA](#relFunction)
 * [hasMany](#relFunction)
-
-## [Relationship](#relationship)
+* [Relationship](#relationship)
 
 Installation
 ------------
@@ -116,6 +115,7 @@ __Returns__
 
 ---------------------------------------
 
+<a name="relationship" />
 ### Relationship
 
 When a relationship is created, it adds a path that refers to the related model on the schema that creates it.
