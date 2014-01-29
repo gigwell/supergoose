@@ -208,6 +208,35 @@ describe('parentOf', function() {
     })
   })
 
+  it('removes parent reference on child object when it is removed from array', function(done) {
+    ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
+    ReferrerSchema.parentOf('Click').enforceWith('_referrer')
+    var Click = mongoose.model('Click', ClickSchema);
+    var Referrer = mongoose.model('Referrer', ReferrerSchema);
+    var id = new mongoose.Types.ObjectId()
+    var id2 = new mongoose.Types.ObjectId()
+    var refId = new mongoose.Types.ObjectId()
+
+    Referrer.create({name: 'hello', _clicks: [id, id2], _id: refId}, function(err, referrer) {
+      Click.create([
+        {_id: id, ip: '1234', _referrer: refId },
+        {_id: id2, ip: '1234', _referrer: refId }
+      ], function(err) {
+        referrer._doc._clicks = [id]
+        referrer.save(function(err) {
+          Click.findById(id, function(err, click) {
+            click._doc._referrer.should.eql(refId)
+
+            Click.findById(id2, function(err, click) {
+              should.not.exist(click._doc._referrer)
+              done()
+            })
+          })
+        })
+      })
+    })
+  })
+
   it('should remove child on remove if delete option set', function(done) {
     ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
     ReferrerSchema.parentOf('Click').enforceWith('_referrer', {delete: true})
