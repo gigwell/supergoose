@@ -1,7 +1,7 @@
 {
   "name": "supergoose",
   "description": "Mongoose plugin for simple addons like findOrCreate",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "keywords": [
     "supergoose",
     "mongodb",
@@ -10,7 +10,11 @@
     "findOrCreate",
     "relationship",
     "parent",
-    "child"
+    "child",
+    "many to many",
+    "one to one",
+    "one to many",
+    "many to one"
   ],
   "repository": {
     "type": "git",
