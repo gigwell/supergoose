@@ -165,7 +165,7 @@ describe('parentOf', function() {
   })
 
   it('should allow for custom paths', function() {
-    ReferrerSchema.parentOf('Click', '_funsos')
+    ReferrerSchema.oneToMany('Click', '_funsos')
     var path = ReferrerSchema.path('_funsos')
 
     should.exist(path)
@@ -237,6 +237,34 @@ describe('parentOf', function() {
     })
   })
 
+  it('remove parent reference from all children if child array set to blank', function(done) {
+    ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
+    ReferrerSchema.parentOf('Click').enforceWith('_referrer')
+    var Click = mongoose.model('Click', ClickSchema);
+    var Referrer = mongoose.model('Referrer', ReferrerSchema);
+    var id = new mongoose.Types.ObjectId()
+    var id2 = new mongoose.Types.ObjectId()
+    var refId = new mongoose.Types.ObjectId()
+
+    Referrer.create({name: 'hello', _clicks: [id, id2], _id: refId}, function(err, referrer) {
+      Click.create([
+        {_id: id, ip: '1234', _referrer: refId },
+        {_id: id2, ip: '1234', _referrer: refId }
+      ], function(err) {
+        referrer._doc._clicks = []
+        referrer.save(function(err) {
+          Click.find({}).exec(function(err, clicks) {
+            clicks.forEach(function(c) {
+              should.not.exist(c._doc._referrer)
+            })
+            done()
+          })
+        })
+      })
+    })
+  })
+
+
   it('should remove child on remove if delete option set', function(done) {
     ClickSchema.add({_referrer: { type: Schema.ObjectId, ref: 'Referrer' }})
     ReferrerSchema.parentOf('Click').enforceWith('_referrer', {delete: true})
@@ -305,7 +333,7 @@ describe('childOf', function() {
   })
 
   it('should allow custom paths', function() {
-    ClickSchema.childOf('Referrer', '_funsos')
+    ClickSchema.manyToOne('Referrer', '_funsos')
     var path = ClickSchema.path('_funsos')
 
     should.exist(path)

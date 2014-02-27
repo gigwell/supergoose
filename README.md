@@ -11,10 +11,10 @@ handy functions.
 
 ## Relationship creator functions
 
-* [parentOf](#relFunction)
-* [childOf](#relFunction)
-* [hasA](#relFunction)
-* [hasMany](#relFunction)
+* [parentOf/oneToMany](#relFunction)
+* [childOf/manyToOne](#relFunction)
+* [hasA/oneToOne](#relFunction)
+* [hasMany/manyToMany](#relFunction)
 * [Relationship](#relationship)
 
 Installation
@@ -101,13 +101,13 @@ __Arguments__
 <a name="relFunction" />
 ### Relationship Creator Functions
 
-* parentOf - Creates a one to many relationship
-* childOf - Creates a many to one relationship
-* hasA - Creates a one to one relationship
-* hasMany - Creates a many to many relationship
+* parentOf / oneToMany - Creates a one to many relationship
+* childOf / manyToOne  - Creates a many to one relationship
+* hasA / oneToOne - Creates a one to one relationship
+* hasMany / manyToMany - Creates a many to many relationship
 
 __Arguments__
-* modelName <String> - Name of related Model
+* modelName <String> -   Name of related Model
 * [myPath] <String> - Name of path on this schema that refers to related Model. (If not provided, a default is used based on the model name. '_clicks' for the above example)
 
 __Returns__
