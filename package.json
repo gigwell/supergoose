@@ -48,5 +48,14 @@
       "name": "JP Erkelens",
       "email": "jp@jamplify.com"
     }
-  ]
+  ],
+  "jshintConfig": {
+    "eqeqeq": true,
+    "indent": 2,
+    "esnext": true,
+    "asi": true,
+    "maxlen": 80,
+    "singleGroups": true,
+    "unused": true
+  }
 }

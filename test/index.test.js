@@ -2,33 +2,33 @@
   * Dependencies
   */
 
-var mocha = require('mocha')
-  , should = require('should')
-  , mongoose = require('mongoose')
-  , Schema = mongoose.Schema
-  , supergoose = require('../lib/supergoose.js')
+var should = require('should'),
+    mongoose = require('mongoose'),
+    Schema = mongoose.Schema,
+    supergoose = require('../lib/supergoose.js')
 
-mongoose.connect('mongodb://localhost/supergoose')
+mongoose.connect(`mongodb:\/\/${process.env.MONGO_HOST}/supergoose`)
 mongoose.connection.on('error', function (err) {
   console.error('MongoDB error: ' + err.message);
-  console.error('Make sure a mongoDB server is running and accessible by this application')
+  console.error('Make sure a mongoDB server is running and accessible')
 });
 
 var ReferrerSchema = new Schema({
-    name: String
-  , address: String
+  name: String,
+  address: String
 })
 
 var ClickSchema = new Schema({
-    ip : {type: String, required: true}
-  , OS: String
-  , browser: String
-  , referrer: {
-    name: String
-  }
+  ip : {type: String, required: true},
+  OS: String,
+  browser: String,
+  referrer: { name: String }
 })
 
-var OtherSchema = new Schema({field: String, _click: {type: Schema.ObjectId, ref: 'Click'}})
+var OtherSchema = new Schema({
+  field: String,
+  _click: {type: Schema.ObjectId, ref: 'Click'}
+})
 
 var messages =  {
   'required': "%s is required"
@@ -52,6 +52,7 @@ afterEach(function(done) {
 describe('findOrCreate', function() {
   it("should create the obeject if it doesn't exist", function(done) {
     Click.findOrCreate({ip: '127.0.0.1'}, function(err, click) {
+      console.log("HI")
       click.ip.should.eql('127.0.0.1')
       Click.count({}, function(err, num) {
         num.should.equal(1)
